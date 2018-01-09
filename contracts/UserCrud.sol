@@ -16,14 +16,13 @@ contract UserCrud {
     // private in case we have child constract, prevent modification
     address[] private userIndex;
 
-    // TODO: Figure out how events work :/
     event LogNewUser   (address indexed userAddress, uint index, bytes32 userEmail, uint userAge);
     event LogUpdateUser(address indexed userAddress, uint index, bytes32 userEmail, uint userAge);
     event LogDeleteUser(address indexed userAddress, uint index);
 
     // INSERT
     function insertUser(address userAddress, bytes32 userEmail, uint userAge) public returns (uint index) {
-        require(isUser(userAddress)); // Validate user before insert
+        require(isUser(userAddress) == false); // Validate user before insert
 
         userStructs[userAddress].email = userEmail;
         userStructs[userAddress].age = userAge;
@@ -31,7 +30,6 @@ contract UserCrud {
         // Set a pointer to the new userIndex item (push returns the new address length, use this minus 1 to get a pointer; saves on gas)
         userStructs[userAddress].index = userIndex.push(userAddress) - 1;
 
-        // How do events work? tbd
         LogNewUser(userAddress, userStructs[userAddress].index, userEmail, userAge);
 
         return userIndex.length - 1;
