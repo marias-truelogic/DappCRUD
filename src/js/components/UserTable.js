@@ -45,8 +45,9 @@ export default class CandidateTable extends React.Component {
                                     <td>{user.address}</td>
                                     <td>{user.email}</td>
                                     <td>{user.age}</td>
-                                    <td>
-                                        <button type="button" className="btn btn-danger" onClick={() => { this.deleteUser(user.address) }}>Delete</button>
+                                    <td style={{"textAlign": "right"}}>
+                                        <a href="#" style={{"marginRight": "15px"}} className="btn btn-primary btn-info" onClick={() => { this.editUser(user) }}><span className="fa fa-pencil"></span> Edit</a>
+                                        <a href="#" className="btn btn-primary btn-danger" onClick={() => { this.deleteUser(user.address) }}><span className="fa fa-trash"></span> Delete</a>
                                     </td>
                                 </tr>
                             )

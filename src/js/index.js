@@ -4,6 +4,7 @@ import Web3 from 'web3';
 import TruffleContract from 'truffle-contract';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
+import 'font-awesome/css/font-awesome.min.css';
 
 // This is information about our deployed contract, the address and it's interface
 import UserCrudABI from '../../build/contracts/UserCrud.json';
