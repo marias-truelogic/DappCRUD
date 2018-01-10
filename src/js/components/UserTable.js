@@ -1,4 +1,6 @@
 import React from "react";
+import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+import { ToastContainer, toast } from 'react-toastify';
 
 export default class CandidateTable extends React.Component {
     constructor(props) {
@@ -6,9 +8,22 @@ export default class CandidateTable extends React.Component {
         this.state = {
             users: this.props.users,
             contract: this.props.contract,
-            web3: this.props.web3
+            web3: this.props.web3,
+            modalOpen: false,
+            modalData: {
+                age: '',
+                address: '',
+                email: ''
+            }
         }
+        this.editUser = this.editUser.bind(this);
+        this.closeModal = this.closeModal.bind(this);
+        this.deleteUser = this.deleteUser.bind(this);
+        this.updateUser = this.updateUser.bind(this);
         this.buildUsersTable = this.buildUsersTable.bind(this);
+        this.showSuccess = this.showSuccess.bind(this);
+        this.showError = this.showError.bind(this);
+        this.onUpdateChange = this.onUpdateChange.bind(this);
     }
 
     componentWillReceiveProps(newProps) {
@@ -23,6 +38,51 @@ export default class CandidateTable extends React.Component {
             const contractRes = await contract.deleteUser(userAddress, { from: process.env.REACT_APP_TEST_ADDRESS, gas: 150000 });
             this.props.syncUsers();
         }
+    }
+
+    editUser(user) {
+        this.setState({ modalOpen: true, modalData: user });
+    }
+
+    showSuccess(message) {
+        toast.success(message, {
+            position: toast.POSITION.BOTTOM_RIGHT
+        });
+    }
+
+    showError(message) {
+        toast.error(message, {
+            position: toast.POSITION.BOTTOM_RIGHT
+        });
+    }
+
+    async updateUser() {
+        const { modalData, contract } = this.state;
+
+        if (!modalData.address || !modalData.email || !modalData.age) return false; // Show error here
+
+        try {
+            const contractRes = await contract.updateUser(modalData.address, modalData.email, modalData.age, { from: process.env.REACT_APP_TEST_ADDRESS, gas: 150000 });
+            this.showSuccess(`User ${modalData.address} updated`);
+        } catch (e) {
+            this.showError(e.message);
+        }
+
+        this.closeModal();
+        this.props.syncUsers();
+    }
+
+    onUpdateChange(event) {
+        this.setState({
+            modalData: {
+                ...this.state.modalData,
+                [event.target.name]: event.target.value
+            }
+        });
+    }
+
+    closeModal() {
+        this.setState({ modalOpen: false });
     }
 
     buildUsersTable() {
@@ -59,11 +119,34 @@ export default class CandidateTable extends React.Component {
     }
 
     render() {
-        const { users } = this.state;
+        const { users, modalData } = this.state;
         return (
             <div className='userTableContainer'>
                 <h3>Users</h3>
                 {users.length ? this.buildUsersTable() : <b>No Users</b>}
+                <Modal isOpen={this.state.modalOpen} >
+                    <ModalHeader>Update User</ModalHeader>
+                    <ModalBody>
+                        <form onSubmit={this.updateUser}>
+                            <div className="form-group">
+                                <label htmlFor="accountAddressInput">Account Address</label>
+                                <input disabled type="text" value={modalData.address} className="form-control" id="accountAddressInput" />
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="emailInput">Email</label>
+                                <input onChange={this.onUpdateChange} type="email" name="email" value={modalData.email} className="form-control" id="emailInput" placeholder="Enter Email" />
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="ageInput">Age</label>
+                                <input onChange={this.onUpdateChange} type="text" name="age" value={modalData.age} className="form-control" id="ageInput" placeholder="Enter Age" />
+                            </div>
+                        </form>
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button color="primary" onClick={this.updateUser}>Submit</Button>{' '}
+                        <Button color="secondary" onClick={this.closeModal}>Cancel</Button>
+                    </ModalFooter>
+                </Modal>
             </div>
         );
     }
